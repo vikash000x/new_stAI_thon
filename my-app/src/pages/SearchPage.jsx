@@ -17,7 +17,7 @@ const SearchPage = () => {
     setResult([]);
     try {
       console.log('Searching for:', client);
-      const { data } = await axios.get(`http://localhost:5000/api/search?client=${client}`);
+      const { data } = await axios.get(`https://stalthai-thon.onrender.com/api/search?client=${client}`);
       if (Array.isArray(data.extracted)) {
         setResult(data.extracted); // 👈 Only store the extracted array
       } else {
