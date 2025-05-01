@@ -22,14 +22,16 @@ console.log("dirname", _dirname)
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
-// const corsOptions = {
-//     origin:'https://binbag-assignment1.onrender.com/',
-//     credentials:true
-// }
+const corsOptions = {
+    origin:'https://stalthai-thon.onrender.com/',
+    credentials:true
+}
+
+app.use(cors(corsOptions));
 
 console.log("goes to use");
 
-app.use(cors());
+
 
 const PORT = process.env.PORT || 3000;
 
