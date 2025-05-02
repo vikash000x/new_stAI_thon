@@ -1,35 +1,32 @@
 // server/controllers/searchController.js
 import { runLangChainPipeline } from '../langchain/agent.js';
-import { scrapeCompany } from '../services/scraper.js';
-import SearchResult from '../models/searchresult.js'; // ✅ Updated import
-
+import { scrapeCompany } from '../services/scraper.js'; // ✅ Updated import
+import Updatedsch from '../models/updatedsch.js';
 export const handleSearch = async (req, res) => {
   console.log("Goes to handleSearch controller");
 
-  const { client } = req.query;
+  const { client, serviceType } = req.query;
+
+  if (!client || !serviceType) {
+    return res.status(400).json({ error: "Client and serviceType are required." });
+  }
 
   try {
-    // ✅ Check if result already exists in DB
-
-    console.log("h1");
-
-    const existing = await SearchResult.findOne({ client });
-    console.log("h2");
-
+    // ✅ Check if result already exists in DB for both client and serviceType
+    const existing = await Updatedsch.findOne({ client, serviceType });
     if (existing) {
-      console.log("Found existing result in database for client:", client);
+      console.log(`Found existing result in database for client: ${client}, service: ${serviceType}`);
       return res.json(existing);
     }
 
-    console.log("Data not found in database, scraping for client:", client);
-
+    console.log(`Data not found in DB. Scraping for client: ${client}, service: ${serviceType}`);
     const scraped = await scrapeCompany(client);
 
     const scrapedText = scraped
       .map(item => `Title: ${item.title}\nDescription: ${item.description}\nLink: ${item.externalLink}`)
       .join('\n\n');
 
-    const { extracted } = await runLangChainPipeline(scrapedText, client);
+    const { extracted } = await runLangChainPipeline(scrapedText, client, serviceType);
     console.log("Extracted data in controller:");
 
     if (!Array.isArray(extracted)) {
@@ -37,9 +34,9 @@ export const handleSearch = async (req, res) => {
       return res.status(500).json({ error: "Extracted data is not an array" });
     }
 
-    const result = new SearchResult({ client, extracted });
+    const result = new Updatedsch({ client, serviceType, extracted });
     await result.save();
-    console.log("Saved result to database for client:", client);
+    console.log("Saved result to DB for client and serviceType.");
 
     res.json(result);
   } catch (error) {

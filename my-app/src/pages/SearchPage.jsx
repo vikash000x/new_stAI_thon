@@ -7,6 +7,7 @@ import { HiOutlineMail } from "react-icons/hi";
 
 const SearchPage = () => {
   const [client, setClient] = useState('');
+  const [serviceType, setServiceType] = useState(''); // 🔥 New state
   const [result, setResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -16,10 +17,15 @@ const SearchPage = () => {
     setError('');
     setResult([]);
     try {
-      console.log('Searching for:', client);
-      const { data } = await axios.get(`https://stalthai-thon.onrender.com/api/search?client=${client}`);
+      console.log('Searching for:', client, 'with service:', serviceType);
+
+      // Use query params for both client and serviceType
+      const { data } = await axios.get(`https://stalthai-thon.onrender.com/api/search`, {
+        params: { client, serviceType }
+      });
+
       if (Array.isArray(data.extracted)) {
-        setResult(data.extracted); // 👈 Only store the extracted array
+        setResult(data.extracted);
       } else {
         setError('Invalid data format received.');
       }
@@ -31,21 +37,26 @@ const SearchPage = () => {
   };
 
   return (
-    
-   <div className="search-container">
- <h1 className="main-title">🔍 Explore Verified Service Providers Associated with Your Target Clients</h1>
-<p className="subtitle">
-  Enter a client name like <strong>Microsoft</strong> or <strong>Google</strong> to discover companies offering them outsourcing or vendor services.
-</p>
+    <div className="search-container">
+      <h1 className="main-title">🔍 Explore Verified Service Providers Associated with Your Target Clients</h1>
+      <p className="subtitle">
+        Enter a client name like <strong>Microsoft</strong> or <strong>Google</strong> and a service like <strong>cloud</strong> or <strong>AI</strong> to discover companies offering them those services.
+      </p>
 
-  <div className="search-bar">
-    <input
-      value={client}
-      onChange={e => setClient(e.target.value)}
-      placeholder="Enter client name"
-    />
-    <button onClick={handleSearch}>Search</button>
-  </div>
+      <div className="search-bar">
+        <input
+          value={client}
+          onChange={e => setClient(e.target.value)}
+          placeholder="Enter client name"
+        />
+        <input
+          value={serviceType}
+          onChange={e => setServiceType(e.target.value)}
+          placeholder="Enter service type"
+        />
+        <button onClick={handleSearch}>Search</button>
+      </div>
+
 
   {loading && (
     <div className="loader-container">
